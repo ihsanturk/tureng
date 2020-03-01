@@ -2,15 +2,22 @@
 #
 # Created: 2020 Feb 09 22:54:30 
 #
-# Requirements: tureng-api, jq, curl
-# tureng-api: https://github.com/gokhanamal/tureng-api
+# Requirements:
+#   - running: tureng-api (https://github.com/ihsanturk/tureng-api)
+#   - jq
+#   - curl
 
 mkdir -p ${HOME}/.cache/tureng/
-pgrep tureng-api &>/dev/null || tureng-api &>/dev/null &
+
+#### TODO vim stucks with this. (for vim-tureng) ############
+#                                                           #
+# pgrep tureng-api &>/dev/null || tureng-api &! &>/dev/null #
+#                                                           #
+#############################################################
+
 ( [ $# -gt 0 ] && echo $@ || cat /dev/stdin ) | while read args; do
 	phrase=$(echo $args | sed 's/ /+/g' | tr '[:upper:]' '[:lower:]');
 	file=${HOME}/.cache/tureng/$phrase.json;
 	curl -so $file "localhost:8080/translate/$phrase" &&
-	cat $file | jq -r '.response|.[]|.tr' | uniq;
-	#cat $file | jq -r '.response|.[]|.en +", "+ .tr + ", " + .kategori';
+	cat $file | jq -r '.response|.[]|.target' | uniq;
 done
