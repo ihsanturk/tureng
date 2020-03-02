@@ -12,13 +12,13 @@ mkdir -p ${HOME}/.cache/tureng/
 ( [ $# -gt 0 ] && echo $@ || cat /dev/stdin ) | while read args; do
 	phrase=$(echo $args | sed 's/ /+/g' | tr '[:upper:]' '[:lower:]');
 	file=${HOME}/.cache/tureng/$phrase.json;
-	if ! [ -s $file ]; then
+	if ! [ -s $file ]; then # TODO: or null
 		pgrep tureng-api &>/dev/null || { echo tureng-api is not up.; exit 1; }
 		curl -so $file "localhost:8080/translate/$phrase" ||
 			{ >&2 echo "`basename $0`: connection error"; exit 2; }
 	fi
-	if [[ $(cat $file | jq -r '.response|.[]|.target' | uniq) == "null" ]]; then
-		if ! [[ $(cat $file | jq -r '.response|.[]|.tr' | uniq) ]]; then
+	if [[ $(cat $file | jq -r '.response|.[]|.target' | uniq) = "null" ]]; then
+		if [[ $(cat $file | jq -r '.response|.[]|.tr' | uniq) = "null" ]]; then
 			>&2 echo "`basename $0`: $phrase: no such phrase"; exit 2;
 		else
 			cat $file | jq -r '.response|.[]|.tr' | uniq
