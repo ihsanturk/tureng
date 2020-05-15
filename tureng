@@ -7,13 +7,15 @@
 #   - jq
 #   - curl
 
-mkdir -p ${HOME}/.cache/tureng/
+mkdir -p "${HOME}/.cache/tureng/"
+
+# TODO @1588078380: Save the other keys in the result json as a cache.
 
 ( [ $# -gt 0 ] && echo $@ || cat /dev/stdin ) | while read args; do
 	phrase=$(echo $args | sed 's/ /+/g' | tr '[:upper:]' '[:lower:]');
 	file=${HOME}/.cache/tureng/$phrase.json;
 	if ! [ -s $file ]; then # TODO: or null
-		pgrep tureng-api &>/dev/null || { echo tureng-api is not up.; exit 1; }
+		pgrep -q tureng-api || nohup tureng-api &&
 		curl -so $file "localhost:8080/translate/$phrase" ||
 			{ >&2 echo "`basename $0`: connection error"; exit 2; }
 	fi
